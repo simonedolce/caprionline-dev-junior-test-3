@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ActorRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ActorRepository::class)]
 #[ORM\Table('actors')]
@@ -15,6 +16,7 @@ class Actor
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['default'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\ActorRepository;
 use App\Repository\GenreRepository;
 use App\Repository\MovieRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,6 +15,7 @@ class MoviesController extends AbstractController
     public function __construct(
         private MovieRepository $movieRepository,
         private GenreRepository $genreRepository,
+        private ActorRepository $actorRepository,
         private SerializerInterface $serializer
     ) {}
 
@@ -33,10 +35,23 @@ class MoviesController extends AbstractController
     #[Route('/genres', methods: ['GET'])]
     public function listGenres(): JsonResponse
     {
-        $genres = $this->genreRepository->findAll();
+        $genres = $this->genreRepository->findBy(array(), array('name' => 'ASC'));
         $data = $this->getSerializer($genres,'default');
         return new JsonResponse($data, json: true);
     }
+
+    /**
+     * @return JsonResponse
+     * Api per il fetch degli attori
+     */
+    #[Route('/actors', methods: ['GET'])]
+    public function listActors(): JsonResponse
+    {
+        $actors = $this->actorRepository->findBy(array(), array('name' => 'ASC'));
+        $data = $this->getSerializer($actors,'default');
+        return new JsonResponse($data, json: true);
+    }
+
 
     private function getSerializer($data, $group): string
     {
