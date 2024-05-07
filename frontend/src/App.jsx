@@ -3,12 +3,19 @@ import { Button, Rating, Spinner } from 'flowbite-react';
 
 const App = props => {
   const [movies, setMovies] = useState([]);
+  const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const host = 'http://localhost:8000/';
+  const endPoints = {
+      getMovies : 'movies',
+      getGenres : 'genres'
+  };
 
   const fetchMovies = () => {
     setLoading(true);
 
-    return fetch('http://localhost:8000/movies')
+    return fetch(host + endPoints.getMovies)
       .then(response => response.json())
       .then(data => {
         setMovies(data);
@@ -16,14 +23,24 @@ const App = props => {
       });
   }
 
+  const fetchGenres = () => {
+      return fetch(host + endPoints.getGenres)
+          .then(response => response.json())
+          .then(data => {
+              setGenres(data)
+          });
+  }
+
   useEffect(() => {
     fetchMovies();
+    fetchGenres();
   }, []);
 
   return (
     <Layout>
       <Heading />
 
+      <Filters genres={genres}></Filters>
       <MovieList loading={loading}>
         {movies.map((item, key) => (
           <MovieItem key={key} {...item} />
@@ -32,6 +49,41 @@ const App = props => {
     </Layout>
   );
 };
+
+const FilterGenre = props => {
+    return (
+        <div className="mr-4">
+            <label htmlFor="category" className="block font-light text-gray-500 text-sm dark:text-gray-400">Genre</label>
+            <select id="category"  className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:border-blue-500">
+                {props.genres.map((item, key) => (
+                    <OptionGenre key={key} {...item} />
+                ))}
+            </select>
+        </div>
+    );
+}
+
+const Filters = props => {
+    return (
+        <div className="container mx-auto p-4">
+            <div className="mb-4">
+                <p className="text-center font-light text-gray-500 sm:text-xl dark:text-gray-400">
+                    Filters
+                </p>
+                <div className="flex">
+                    <FilterGenre genres={props.genres}></FilterGenre>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const OptionGenre = props => {
+    return (
+        <option value={props.id}>{props.name}</option>
+    );
+
+}
 
 const Layout = props => {
   return (
