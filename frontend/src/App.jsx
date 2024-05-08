@@ -5,14 +5,12 @@ const App = props => {
   const [movies, setMovies] = useState([]);
   const [genres, setGenres] = useState([]);
   const [actors,setAuthors] = useState([]);
-
-  const [formData, setFormData] = useState({
-    genres: [],
-    actors: [],
-    filmName: ''
-  });
-
   const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+      genres: [],
+      actors: [],
+      filmName: ''
+  });
 
   const host = 'http://localhost:8000/';
   const endPoints = {
@@ -21,14 +19,20 @@ const App = props => {
       getActors : 'actors'
   };
 
-  const fetchFromServer = (endpoint) => {
-      return fetch(host + endpoint)
+  const fetchFromServer = (endpoint, params= null) => {
+      const url = new URL(host + endpoint);
+
+      if(params) {
+        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+      }
+
+      return fetch(url)
           .then(response => response.json());
   }
 
   const fetchMovies = () => {
       setLoading(true);
-      return fetchFromServer(endPoints.getMovies).then(data => {
+      return fetchFromServer(endPoints.getMovies,formData).then(data => {
           setMovies(data);
           setLoading(false);
       });
@@ -44,17 +48,44 @@ const App = props => {
       });
   }
 
+  const handleChanges = e => {
+      const { name, value, type, options } = e.target;
+      let changes;
+
+      if(type === 'select-multiple') {
+        let changes = Array.from(options)
+            .filter(option => option.selected)
+            .map(option => option.id);
+
+        setFormData(prevData => ({
+            ...prevData,
+            [name]: changes
+        }));
+
+      } else {
+          changes = value;
+          setFormData(prevData => ({
+              ...prevData,
+              filmName: changes
+          }));
+      }
+
+  };
+
   useEffect(() => {
     fetchMovies();
-    fetchGenres();
-    fetchActors();
+  }, [formData]);
+
+  useEffect(() => {
+      fetchGenres();
+      fetchActors();
   }, []);
 
   return (
     <Layout>
       <Heading />
 
-      <Filters genres={genres} actors={actors}></Filters>
+      <Filters onChange={handleChanges} form={formData} genres={genres} actors={actors}></Filters>
       <MovieList loading={loading}>
         {movies.map((item, key) => (
           <MovieItem key={key} {...item} />
@@ -64,7 +95,7 @@ const App = props => {
   );
 };
 
-const Filters = props => {
+const Filters = ({ onChange, form, genres , actors }) => {
     return (
         <form>
             <div className="container mx-auto p-4">
@@ -73,9 +104,9 @@ const Filters = props => {
                         Filters
                     </p>
                     <div className="p-4">
-                        <FilterGenre genres={props.genres}></FilterGenre>
-                        <FilterActors actors={props.actors}></FilterActors>
-                        <FilterName></FilterName>
+                        <FilterGenre  onChange={onChange} genres={genres}></FilterGenre>
+                        <FilterActors onChange={onChange} actors={actors}></FilterActors>
+                        <FilterName onChange={onChange} value={form.filmName}></FilterName>
                     </div>
                 </div>
             </div>
@@ -86,7 +117,7 @@ const Filters = props => {
 const FilterGenre = props => {
     return (
         <div className="rounded bg-gray-100 p-4">
-            <Select label='Genre' list={props.genres}></Select>
+            <Select nameProp={'genres'} onChange={props.onChange} name={'genre'} label='Genre' list={props.genres}></Select>
         </div>
     );
 }
@@ -94,7 +125,7 @@ const FilterGenre = props => {
 const FilterActors = props => {
     return (
         <div className="rounded bg-gray-100 p-4">
-            <Select label='Actors' list={props.actors}></Select>
+            <Select nameProp={'actors'} onChange={props.onChange} label='Actors' list={props.actors}></Select>
         </div>
     );
 }
@@ -103,7 +134,7 @@ const FilterName = props => {
     return (
         <div className="rounded bg-gray-100 p-4">
             <label className="block mb-2 text-sm font-light text-gray-900 dark:text-white">Film Name</label>
-            <input type="text" className=" rounded" placeholder="ex: The Godfather"/>
+            <input name='name' onChange={props.onChange} type="text" className="rounded" placeholder="ex: The Godfather"/>
         </div>
     );
 }
@@ -112,9 +143,9 @@ const Select = props => {
     return (
         <div className="mr-4">
             <label className="block mb-2 text-sm font-light text-gray-900 dark:text-white">{props.label}</label>
-            <select multiple className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                {props.list.map((item, key) => (
-                    <Option value={item.id} text={item.name}/>
+            <select name={props.nameProp} value={props.value} onChange={props.onChange} multiple className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                {props.list.map((item) => (
+                    <Option key={item.id} value={item.id} text={item.name}/>
                 ))}
             </select>
         </div>
@@ -123,9 +154,8 @@ const Select = props => {
 
 const Option = props => {
     return (
-        <option value={props.value}> {props.text} </option>
+        <option id={props.value}> {props.text} </option>
     );
-
 }
 
 const Layout = props => {
