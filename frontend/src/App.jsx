@@ -4,43 +4,57 @@ import { Button, Rating, Spinner } from 'flowbite-react';
 const App = props => {
   const [movies, setMovies] = useState([]);
   const [genres, setGenres] = useState([]);
+  const [actors,setAuthors] = useState([]);
+
+  const [formData, setFormData] = useState({
+    genres: [],
+    actors: [],
+    filmName: ''
+  });
+
   const [loading, setLoading] = useState(true);
 
   const host = 'http://localhost:8000/';
   const endPoints = {
       getMovies : 'movies',
-      getGenres : 'genres'
+      getGenres : 'genres',
+      getActors : 'actors'
   };
 
-  const fetchMovies = () => {
-    setLoading(true);
-
-    return fetch(host + endPoints.getMovies)
-      .then(response => response.json())
-      .then(data => {
-        setMovies(data);
-        setLoading(false);
-      });
+  const fetchFromServer = (endpoint) => {
+      return fetch(host + endpoint)
+          .then(response => response.json());
   }
 
+  const fetchMovies = () => {
+      setLoading(true);
+      return fetchFromServer(endPoints.getMovies).then(data => {
+          setMovies(data);
+          setLoading(false);
+      });
+  }
   const fetchGenres = () => {
-      return fetch(host + endPoints.getGenres)
-          .then(response => response.json())
-          .then(data => {
-              setGenres(data)
-          });
+      return fetchFromServer(endPoints.getGenres).then(data => {
+          setGenres(data)
+      });
+  }
+  const fetchActors = () => {
+      return fetchFromServer(endPoints.getActors).then(data => {
+          setAuthors(data)
+      });
   }
 
   useEffect(() => {
     fetchMovies();
     fetchGenres();
+    fetchActors();
   }, []);
 
   return (
     <Layout>
       <Heading />
 
-      <Filters genres={genres}></Filters>
+      <Filters genres={genres} actors={actors}></Filters>
       <MovieList loading={loading}>
         {movies.map((item, key) => (
           <MovieItem key={key} {...item} />
@@ -50,37 +64,66 @@ const App = props => {
   );
 };
 
+const Filters = props => {
+    return (
+        <form>
+            <div className="container mx-auto p-4">
+                <div className="mb-4">
+                    <p className="text-center font-light text-gray-500 sm:text-xl dark:text-gray-400">
+                        Filters
+                    </p>
+                    <div className="p-4">
+                        <FilterGenre genres={props.genres}></FilterGenre>
+                        <FilterActors actors={props.actors}></FilterActors>
+                        <FilterName></FilterName>
+                    </div>
+                </div>
+            </div>
+        </form>
+    );
+};
+
 const FilterGenre = props => {
     return (
+        <div className="rounded bg-gray-100 p-4">
+            <Select label='Genre' list={props.genres}></Select>
+        </div>
+    );
+}
+
+const FilterActors = props => {
+    return (
+        <div className="rounded bg-gray-100 p-4">
+            <Select label='Actors' list={props.actors}></Select>
+        </div>
+    );
+}
+
+const FilterName = props => {
+    return (
+        <div className="rounded bg-gray-100 p-4">
+            <label className="block mb-2 text-sm font-light text-gray-900 dark:text-white">Film Name</label>
+            <input type="text" className=" rounded" placeholder="ex: The Godfather"/>
+        </div>
+    );
+}
+
+const Select = props => {
+    return (
         <div className="mr-4">
-            <label htmlFor="category" className="block font-light text-gray-500 text-sm dark:text-gray-400">Genre</label>
-            <select id="category"  className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:border-blue-500">
-                {props.genres.map((item, key) => (
-                    <OptionGenre key={key} {...item} />
+            <label className="block mb-2 text-sm font-light text-gray-900 dark:text-white">{props.label}</label>
+            <select multiple className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                {props.list.map((item, key) => (
+                    <Option value={item.id} text={item.name}/>
                 ))}
             </select>
         </div>
     );
 }
 
-const Filters = props => {
+const Option = props => {
     return (
-        <div className="container mx-auto p-4">
-            <div className="mb-4">
-                <p className="text-center font-light text-gray-500 sm:text-xl dark:text-gray-400">
-                    Filters
-                </p>
-                <div className="flex">
-                    <FilterGenre genres={props.genres}></FilterGenre>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const OptionGenre = props => {
-    return (
-        <option value={props.id}>{props.name}</option>
+        <option value={props.value}> {props.text} </option>
     );
 
 }
