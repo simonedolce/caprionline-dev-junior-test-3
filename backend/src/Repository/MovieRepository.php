@@ -5,7 +5,7 @@ namespace App\Repository;
 use App\Entity\Movie;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-
+use App\Util\Costants;
 /**
  * @extends ServiceEntityRepository<Movie>
  *
@@ -45,4 +45,46 @@ class MovieRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * @param array $filters
+     * @return Movie[]
+     */
+    public function getAllFilter(array $filters = []): array
+    {
+
+        $qb = $this->createQueryBuilder('m');
+
+        if(!is_null($filters[Costants::GENRE_FIELD_NAME])){
+            $ids = array_map('intval', explode(',',$filters[Costants::GENRE_FIELD_NAME]));
+            $qb->leftJoin('m.movieGenres', 'ma') // Assume che 'movieActors' sia il nome della relazione tra Movie e Actor nella tua entità Movie
+            ->andWhere($qb->expr()->in('ma.genre', ':ids'))
+                ->setParameter('ids', $ids);
+        }
+
+        if(!is_null($filters[Costants::ACTOR_FIELD_NAME])){
+            $ids = array_map('intval', explode(',',$filters[Costants::ACTOR_FIELD_NAME]));
+
+            $qb->leftJoin('m.movieActors', 'ma') // Assume che 'movieActors' sia il nome della relazione tra Movie e Actor nella tua entità Movie
+            ->andWhere($qb->expr()->in('ma.actor', ':ids'))
+                ->setParameter('ids', $ids);
+        }
+
+        if(!is_null($filters[Costants::FILM_NAME_FIELD_NAME])){
+            $qb->andWhere('m.title LIKE :title')
+                ->setParameter('title', "%{$filters[Costants::FILM_NAME_FIELD_NAME]}%");
+        }
+
+        if(!is_null($filters[Costants::DATE_ORDER])){
+            $qb->orderBy('m.releaseDate', $filters[Costants::DATE_ORDER]);
+        }
+
+        if(!is_null($filters[Costants::RATING_ORDER])){
+            $qb->orderBy('m.rating', $filters[Costants::RATING_ORDER]);
+        }
+
+        return $qb->getQuery()->getResult();
+
+    }
+
 }

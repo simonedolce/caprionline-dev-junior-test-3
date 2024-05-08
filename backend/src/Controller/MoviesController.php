@@ -25,11 +25,11 @@ class MoviesController extends AbstractController
     public function list(Request $request): JsonResponse
     {
         $filters = array(
-            Costants::GENRE_FIELD_NAME => array(),
-            Costants::ACTOR_FIELD_NAME => array(),
+            Costants::GENRE_FIELD_NAME => null,
+            Costants::ACTOR_FIELD_NAME => null,
             Costants::FILM_NAME_FIELD_NAME => null,
-            Costants::DATE_ORDER => '',
-            Costants::RATING_ORDER => ''
+            Costants::DATE_ORDER => null,
+            Costants::RATING_ORDER => null
         );
 
         foreach (Costants::MOVIE_FILTER_FIELDS as $fieldName) {
@@ -38,7 +38,7 @@ class MoviesController extends AbstractController
             }
         }
 
-        $movies = $this->movieRepository->findAll();
+        $movies = $this->movieRepository->getAllFilter($filters);
         $data = $this->getSerializer($movies, 'default');
 
         return new JsonResponse($data, json: true);
