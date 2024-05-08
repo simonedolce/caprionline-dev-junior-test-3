@@ -9,7 +9,9 @@ const App = props => {
   const [formData, setFormData] = useState({
       genres: [],
       actors: [],
-      filmName: ''
+      filmName: '',
+      dateOrder: 'DESC',
+      ratingOrder: 'DESC'
   });
 
   const host = 'http://localhost:8000/';
@@ -69,7 +71,21 @@ const App = props => {
               filmName: changes
           }));
       }
+  };
+  const handleOrders = e => {
+      const {name} = e.target;
+      let value;
 
+      if(name === 'dateOrder'){
+          value = formData.dateOrder === 'ASC' ? 'DESC' : 'ASC';
+      } else {
+          value = formData.ratingOrder === 'ASC' ? 'DESC' : 'ASC';
+      }
+
+      setFormData(prevData => ({
+          ...prevData,
+          [name]: value
+      }));
   };
 
   useEffect(() => {
@@ -85,7 +101,7 @@ const App = props => {
     <Layout>
       <Heading />
 
-      <Filters onChange={handleChanges} form={formData} genres={genres} actors={actors}></Filters>
+      <Filters onOrdersChange={handleOrders} onChange={handleChanges} form={formData} genres={genres} actors={actors}></Filters>
       <MovieList loading={loading}>
         {movies.map((item, key) => (
           <MovieItem key={key} {...item} />
@@ -95,28 +111,36 @@ const App = props => {
   );
 };
 
-const Filters = ({ onChange, form, genres , actors }) => {
+const Filters = ({ onOrdersChange, onChange, form, genres , actors }) => {
     return (
-        <form>
-            <div className="container mx-auto p-4">
-                <div className="mb-4">
-                    <p className="text-center font-light text-gray-500 sm:text-xl dark:text-gray-400">
-                        Filters
-                    </p>
-                    <div className="p-4">
-                        <FilterGenre  onChange={onChange} genres={genres}></FilterGenre>
-                        <FilterActors onChange={onChange} actors={actors}></FilterActors>
-                        <FilterName onChange={onChange} value={form.filmName}></FilterName>
-                    </div>
+        <div className="container mx-auto p-4">
+            <div className="mb-4">
+                <p className="text-center font-light text-gray-500 sm:text-xl dark:text-gray-400">
+                    Filters
+                </p>
+                <div className="p-4">
+                    <FilterGenre  onChange={onChange} genres={genres}></FilterGenre>
+                    <FilterActors onChange={onChange} actors={actors}></FilterActors>
+                    <FilterName onChange={onChange} value={form.filmName}></FilterName>
+                </div>
+                <div className="flex p-4 space-x-4">
+                    <OrderButton name='dateOrder' onClick={onOrdersChange} text={`Date ${form.dateOrder === 'ASC' ? '▲' : '▼'}`}></OrderButton>
+                    <OrderButton name='ratingOrder' onClick={onOrdersChange} text={`⭐ ${form.ratingOrder === 'ASC' ? '▲' : '▼'}`}></OrderButton>
                 </div>
             </div>
-        </form>
+        </div>
     );
 };
 
+const OrderButton = props => {
+    return (
+        <button name={props.name} onClick={props.onClick} className="bg-black hover:bg-gray-600 text-white font-light py-2 px-4 rounded">{props.text}</button>
+    );
+}
+
 const FilterGenre = props => {
     return (
-        <div className="rounded bg-gray-100 p-4">
+        <div className="bg-gray-100 p-4">
             <Select nameProp={'genres'} onChange={props.onChange} name={'genre'} label='Genre' list={props.genres}></Select>
         </div>
     );
@@ -124,7 +148,7 @@ const FilterGenre = props => {
 
 const FilterActors = props => {
     return (
-        <div className="rounded bg-gray-100 p-4">
+        <div className="bg-gray-100 p-4">
             <Select nameProp={'actors'} onChange={props.onChange} label='Actors' list={props.actors}></Select>
         </div>
     );
@@ -132,7 +156,7 @@ const FilterActors = props => {
 
 const FilterName = props => {
     return (
-        <div className="rounded bg-gray-100 p-4">
+        <div className="bg-gray-100 p-4">
             <label className="block mb-2 text-sm font-light text-gray-900 dark:text-white">Film Name</label>
             <input name='name' onChange={props.onChange} type="text" className="rounded" placeholder="ex: The Godfather"/>
         </div>
