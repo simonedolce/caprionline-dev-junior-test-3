@@ -24,7 +24,13 @@ class MoviesController extends AbstractController
     #[Route('/movies', methods: ['GET'])]
     public function list(Request $request): JsonResponse
     {
-        $filters = array(Costants::GENRE_FIELD_NAME => array(), Costants::ACTOR_FIELD_NAME => array(), Costants::FILM_NAME_FIELD_NAME => null);
+        $filters = array(
+            Costants::GENRE_FIELD_NAME => array(),
+            Costants::ACTOR_FIELD_NAME => array(),
+            Costants::FILM_NAME_FIELD_NAME => null,
+            Costants::DATE_ORDER => '',
+            Costants::RATING_ORDER => ''
+        );
 
         foreach (Costants::MOVIE_FILTER_FIELDS as $fieldName) {
             if($request->query->get($fieldName)){
