@@ -10,8 +10,8 @@ const App = props => {
       genres: [],
       actors: [],
       filmName: '',
-      dateOrder: 'DESC',
-      ratingOrder: 'DESC'
+      dateOrder: '',
+      ratingOrder: ''
   });
 
   const host = 'http://localhost:8000/';
@@ -75,11 +75,18 @@ const App = props => {
   const handleOrders = e => {
       const {name} = e.target;
       let value;
-
       if(name === 'dateOrder'){
           value = formData.dateOrder === 'ASC' ? 'DESC' : 'ASC';
+          setFormData(prevData => ({
+              ...prevData,
+              ratingOrder: ''
+          }));
       } else {
           value = formData.ratingOrder === 'ASC' ? 'DESC' : 'ASC';
+          setFormData(prevData => ({
+              ...prevData,
+              dateOrder: ''
+          }));
       }
 
       setFormData(prevData => ({
