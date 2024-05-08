@@ -9,6 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use App\Util\Costants;
 
 class MoviesController extends AbstractController
 {
@@ -20,8 +22,16 @@ class MoviesController extends AbstractController
     ) {}
 
     #[Route('/movies', methods: ['GET'])]
-    public function list(): JsonResponse
+    public function list(Request $request): JsonResponse
     {
+        $filters = array(Costants::GENRE_FIELD_NAME => array(), Costants::ACTOR_FIELD_NAME => array(), Costants::FILM_NAME_FIELD_NAME => null);
+
+        foreach (Costants::MOVIE_FILTER_FIELDS as $fieldName) {
+            if($request->query->get($fieldName)){
+                $filters[$fieldName] = $request->query->get($fieldName);
+            }
+        }
+
         $movies = $this->movieRepository->findAll();
         $data = $this->getSerializer($movies, 'default');
 
