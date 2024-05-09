@@ -57,8 +57,8 @@ class MovieRepository extends ServiceEntityRepository
 
         if(!is_null($filters[Costants::GENRE_FIELD_NAME])){
             $ids = array_map('intval', explode(',',$filters[Costants::GENRE_FIELD_NAME]));
-            $qb->leftJoin('m.movieGenres', 'ma')
-            ->andWhere($qb->expr()->in('ma.genre', ':ids'))
+            $qb->leftJoin('m.movieGenres', 'mg')
+            ->andWhere($qb->expr()->in('mg.genre', ':ids'))
                 ->setParameter('ids', $ids);
         }
 
@@ -71,8 +71,21 @@ class MovieRepository extends ServiceEntityRepository
         }
 
         if(!is_null($filters[Costants::FILM_NAME_FIELD_NAME])){
-            $qb->andWhere('m.title LIKE :title')
+            $qb->leftJoin('m.movieKeywords', 'mk');
+
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->like('m.title', ':title'),
+                    $qb->expr()->like('mk.keyword', ':title')
+                ))
                 ->setParameter('title', "%{$filters[Costants::FILM_NAME_FIELD_NAME]}%");
+
+            //$qb->andWhere('m.title LIKE :title')
+            //    ->setParameter('title', "%{$filters[Costants::FILM_NAME_FIELD_NAME]}%");
+//
+            //$qb->leftJoin('m.movieKeywords', 'mk')
+            //    ->andWhere('mk.keyword LIKE :keywords')
+            //    ->setParameter('keywords',"%{$filters[Costants::FILM_NAME_FIELD_NAME]}%");
         }
 
         if(!is_null($filters[Costants::DATE_ORDER])){
