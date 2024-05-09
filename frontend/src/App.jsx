@@ -31,7 +31,15 @@ const App = props => {
       return fetch(url)
           .then(response => response.json());
   }
-
+  function debounce(func, timeout = 500) {
+      let timer;
+      return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+              func.apply(this, args);
+          }, timeout);
+      };
+  }
   const fetchMovies = () => {
       setLoading(true);
       return fetchFromServer(endPoints.getMovies,formData).then(data => {
@@ -50,7 +58,7 @@ const App = props => {
       });
   }
 
-  const handleChanges = e => {
+  const handleChanges = debounce((e) => {
       const { name, value, type, options } = e.target;
       let changes;
 
@@ -71,7 +79,7 @@ const App = props => {
               filmName: changes
           }));
       }
-  };
+  });
   const handleOrders = e => {
       const {name} = e.target;
       let value;
@@ -131,8 +139,8 @@ const Filters = ({ onOrdersChange, onChange, form, genres , actors }) => {
                     <FilterName onChange={onChange} value={form.filmName}></FilterName>
                 </div>
                 <div className="flex p-4 space-x-4">
-                    <OrderButton name='dateOrder' onClick={onOrdersChange} text={`Date ${form.dateOrder === 'ASC' ? '▲' : '▼'}`}></OrderButton>
-                    <OrderButton name='ratingOrder' onClick={onOrdersChange} text={`⭐ ${form.ratingOrder === 'ASC' ? '▲' : '▼'}`}></OrderButton>
+                    <OrderButton name='dateOrder' onClick={onOrdersChange} text={`📅 ${form.dateOrder === 'ASC' ? '🔼' : '🔽'}`}></OrderButton>
+                    <OrderButton name='ratingOrder' onClick={onOrdersChange} text={`⭐ ${form.ratingOrder === 'ASC' ? '🔼' : '🔽'}`}></OrderButton>
                 </div>
             </div>
         </div>
