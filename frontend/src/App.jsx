@@ -172,7 +172,7 @@ const FilterActors = props => {
 const FilterName = props => {
     return (
         <div className="bg-gray-100 p-4">
-            <label className="block mb-2 text-sm font-light text-gray-900 dark:text-white">Film Name</label>
+            <label className="block mb-2 text-sm font-light text-gray-900 dark:text-white">Film Name (or keywords)</label>
             <input name='name' onChange={props.onChange} type="text" className="rounded" placeholder="ex: The Godfather"/>
         </div>
     );
