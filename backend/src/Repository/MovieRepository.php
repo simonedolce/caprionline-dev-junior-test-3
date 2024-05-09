@@ -70,6 +70,7 @@ class MovieRepository extends ServiceEntityRepository
                 ->setParameter('ids', $ids);
         }
 
+        // Cerco il testo nel titolo del film o nell'associativa MovieKeyword
         if(!is_null($filters[Costants::FILM_NAME_FIELD_NAME])){
             $qb->leftJoin('m.movieKeywords', 'mk');
 
@@ -79,13 +80,6 @@ class MovieRepository extends ServiceEntityRepository
                     $qb->expr()->like('mk.keyword', ':title')
                 ))
                 ->setParameter('title', "%{$filters[Costants::FILM_NAME_FIELD_NAME]}%");
-
-            //$qb->andWhere('m.title LIKE :title')
-            //    ->setParameter('title', "%{$filters[Costants::FILM_NAME_FIELD_NAME]}%");
-//
-            //$qb->leftJoin('m.movieKeywords', 'mk')
-            //    ->andWhere('mk.keyword LIKE :keywords')
-            //    ->setParameter('keywords',"%{$filters[Costants::FILM_NAME_FIELD_NAME]}%");
         }
 
         if(!is_null($filters[Costants::DATE_ORDER])){
