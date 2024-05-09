@@ -39,7 +39,7 @@ class MoviesController extends AbstractController
         }
 
         $movies = $this->movieRepository->getAllFilter($filters);
-        $data = $this->getSerializer($movies, 'default');
+        $data = $this->getSerializer($movies);
 
         return new JsonResponse($data, json: true);
     }
@@ -52,7 +52,7 @@ class MoviesController extends AbstractController
     public function listGenres(): JsonResponse
     {
         $genres = $this->genreRepository->findBy(array(), array('name' => 'ASC'));
-        $data = $this->getSerializer($genres,'default');
+        $data = $this->getSerializer($genres);
         return new JsonResponse($data, json: true);
     }
 
@@ -64,13 +64,13 @@ class MoviesController extends AbstractController
     public function listActors(): JsonResponse
     {
         $actors = $this->actorRepository->findBy(array(), array('name' => 'ASC'));
-        $data = $this->getSerializer($actors,'default');
+        $data = $this->getSerializer($actors);
         return new JsonResponse($data, json: true);
     }
 
 
-    private function getSerializer($data, $group): string
+    private function getSerializer($data): string
     {
-        return $this->serializer->serialize($data , "json", ["groups" => $group]);
+        return $this->serializer->serialize($data , "json", ["groups" => 'default']);
     }
 }

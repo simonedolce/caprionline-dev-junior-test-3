@@ -57,7 +57,7 @@ class MovieRepository extends ServiceEntityRepository
 
         if(!is_null($filters[Costants::GENRE_FIELD_NAME])){
             $ids = array_map('intval', explode(',',$filters[Costants::GENRE_FIELD_NAME]));
-            $qb->leftJoin('m.movieGenres', 'ma') // Assume che 'movieActors' sia il nome della relazione tra Movie e Actor nella tua entità Movie
+            $qb->leftJoin('m.movieGenres', 'ma')
             ->andWhere($qb->expr()->in('ma.genre', ':ids'))
                 ->setParameter('ids', $ids);
         }
@@ -65,7 +65,7 @@ class MovieRepository extends ServiceEntityRepository
         if(!is_null($filters[Costants::ACTOR_FIELD_NAME])){
             $ids = array_map('intval', explode(',',$filters[Costants::ACTOR_FIELD_NAME]));
 
-            $qb->leftJoin('m.movieActors', 'ma') // Assume che 'movieActors' sia il nome della relazione tra Movie e Actor nella tua entità Movie
+            $qb->leftJoin('m.movieActors', 'ma')
             ->andWhere($qb->expr()->in('ma.actor', ':ids'))
                 ->setParameter('ids', $ids);
         }
